@@ -12,8 +12,8 @@
 // allows us to easily construct an linked list of vertices.
 typedef struct {
   GVertex_t         data;
-  struct vertex    *next;
-} vertex;
+  struct Vertex    *next;
+} Vertex;
 
 // A listitem is composed of:
 //
@@ -23,7 +23,7 @@ typedef struct {
 // 4. A pointer to the next item in the list.
 typedef struct litem {
   GVertex_t         data;
-  vertex           *adjlist;
+  Vertex           *adjlist;
   int               count;   
   struct litem     *next;
 } ListItem;
