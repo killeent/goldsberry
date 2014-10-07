@@ -1,9 +1,10 @@
 // Original Author: Trevor Killeen (2014)
 // 
-// Represents a undirected Graph ADT.
+// Represents a weighted, undirected Graph ADT.
 //
 // A Graph G(V,E) is a set of vertices V and pairs of connected vertices
-// {V1,V2} known as edges. 
+// {V1,V2} known as edges. Each edge {V1,V2} has an associated weight W that
+// is non-negative.
 
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
@@ -21,6 +22,14 @@ typedef struct graphimpl *Graph;
 // memory management and vertex comparisons isn't worth it for the scope
 // of this project.
 typedef int GVertex_t;
+
+// A neighbor is a composed of a vertex and a weight. Thus for any given
+// vertex, the outgoing edges from that vertex can represented as a set of
+// neighbors.
+typedef struct neighb {
+  GVertex_t v;
+  int       weight;
+} Neighbor;
 
 // Allocates a new Graph.
 Graph AllocateGraph();
@@ -60,9 +69,9 @@ bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2);
 //    -- out  pointer to a location where we can store the neighbors.
 //
 // Returns -1 if the passed vertex isn't in the Graph, 0 if it has no neighbors,
-// otherwise 1. In the later casereturns array of vertices in the location 
-// specified by out. The client is required to free this array. 
-int GetNeighbors(Graph g, GVertex_t v, GVertex_t **out);
+// otherwise 1. In the later casereturns array of Neighbors in the location specified
+// by out. The client is responsible for free()'ing this array.
+int GetNeighbors(Graph g, GVertex_t v, Neighbor **out);
 
 // Adds an edge between two vertices. If either of the vertices is not
 // present in the Graph, they are automatically added.
@@ -72,9 +81,10 @@ int GetNeighbors(Graph g, GVertex_t v, GVertex_t **out);
 //    -- g    the Graph to add the edge to.
 //    -- v1   the source vertex.
 //    -- v2   the destination vertex.
+//    -- w    the weight of the edge.
 //
 // Returns void.
-void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2);
+void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w);
 
 // Removes an edge between vertices.
 //

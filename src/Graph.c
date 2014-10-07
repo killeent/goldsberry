@@ -42,7 +42,6 @@ bool ContainsVertex(Graph g, GVertex_t v) {
 
 bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2) {
   ListItem *l1; 
-  Vertex *v3;
 
   l1 = FindVertex(g, v1);
   if (l1 == NULL) {
