@@ -32,6 +32,8 @@ Graph AllocateGraph();
 //    -- g    the Graph to free.
 void FreeGraph(Graph g);
 
+// TODO: add contains Vertex
+
 // Tests to see if two vertices are adjacent.
 //
 // Arguments:
