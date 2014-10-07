@@ -8,8 +8,8 @@
 
 // Helper function declarations
 ListItem *FindVertex(Graph g, GVertex_t v);
-ListItem *FindFirstVertex(ListItem *l, GVertex_t v1, GVertex_t v2);
-int AddEdge(ListItem *li, GVertex_t v, int w);
+ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2);
+int AddEdge(ListItem *vertex, GVertex_t v, int w);
 
 Graph AllocateGraph() {
   Graph g;
@@ -27,11 +27,10 @@ void FreeGraph(Graph g) {
 
 // Loops through the Graph looking for the given vertex. Returns a reference
 // to that vertex if it exists. Otherwise, returns NULL.
-ListItem *FindVertex(Graph g, GVertex_t v) {
-  ListItem *l;
-  for (l = g->adjlist; l != NULL; l = l->next) {
-    if (l->data == v) {
-      return l;
+ListItem *FindVertex(ListItem *vertex, GVertex_t v) {
+  for (vertex = g->adjvertexist; vertex != NULL; vertex = vertex->next) {
+    if (vertex->data == v) {
+      return vertex;
     }
   }
   return NULL;
@@ -40,10 +39,10 @@ ListItem *FindVertex(Graph g, GVertex_t v) {
 // Loops through the Graph starting at llooking for one of the two vertices. 
 // Returns a reference to the first of the two vertices it finds, if one of 
 // them exists. Otherwise, returns NULL.
-ListItem *FindFirstVertex(ListItem *l, GVertex_t v1, GVertex_t v2) {
-  for (l = g->front; l != NULL; l = l->next) {
-    if (l->data == v1 || l-> data == v2) {
-      return l;
+ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2) {
+  for (vertex = g->front; vertex != NULL; vertex = vertex->next) {
+    if (vertex->data == v1 || vertex-> data == v2) {
+      return vertex;
     }
   }
   return NULL;
@@ -54,22 +53,22 @@ bool ContainsVertex(Graph g, GVertex_t v) {
 }
 
 bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2) {
-  ListItem *l1; 
+  ListItem *vertex; 
   EdgeItem *neighb;
   GVertex_t v3;
 
-  l1 = FindFirstVertex(g->front, v1, v2);
-  if (l1 == NULL) {
+  vertex = FindFirstVertex(g->front, v1, v2);
+  if (vertex == NULL) {
     return false;
   } 
 
   // determine which of the two vertices we found, so we can
   // look for the other.
-  v3 = (li->data == v1) ? v2 : v1;
+  v3 = (vertex->data == v1) ? v2 : v1;
 
   // now loop through the edges
 
-  for (neighb = li->neighbors; neighb != NULL; neighb = neigbh->next) {
+  for (neighb = vertex->neighbors; neighb != NULL; neighb = neigbh->next) {
     if (neighb->data == v3) {
       return true;
     }
@@ -79,28 +78,28 @@ bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2) {
 }
 
 int GetNeighbors(Graph g, GVertex_t v, Neighbor **out) {
-  ListItem *li;
+  ListItem *vertex;
   EdgeItem *neighb;
   int i;
   
-  li = FindVertex(g->front, v1);
-  if (li == NULL) {
+  vertex = FindVertex(g->front, v1);
+  if (vertex == NULL) {
     return -1;  
   }
-  if (li->count == 0) {
+  if (vertex->count == 0) {
     return 0;
   }
-  *out = (Neighbor *)malloc(sizeof(Neighbor)*li->count);
+  *out = (Neighbor *)malloc(sizeof(Neighbor)*vertex->count);
   if (*out == NULL) {
-    // TODO: some sort of graceful memory error
+    return -2;
   }
   i = 0;
-  for (neighb = li->neighbors; neighb != NULL; neighb = neighb->next) {
+  for (neighb = vertex->neighbors; neighb != NULL; neighb = neighb->next) {
     out[i].v = neighb.data;
     out[i].weight = neighb.weight;
     i++;
   }
-  return li->count;
+  return vertex->count;
 }
 
 // Adds and edge to vertex v with weight w to the vertex stored in li. This

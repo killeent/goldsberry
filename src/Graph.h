@@ -68,9 +68,14 @@ bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2);
 //    -- v    the vertex to get neighbors from.
 //    -- out  pointer to a location where we can store the neighbors.
 //
-// Returns -1 if the passed vertex isn't in the Graph, 0 if it has no 
-// neighbors, otherwise the number of neighbors. In the later 
-// casereturns array of Neighbors in the location specified
+// Returns: 
+//  
+//    -2 for out of memory error, 
+//    -1 if the passed vertex isn't in the Graph, 
+//     0 if it has no neighbors
+//    otherwise returns the number of neighbors. 
+//    
+// In the latter case returns array of Neighbors in the location specified
 // by out. The client is responsible for free()'ing this array.
 int GetNeighbors(Graph g, GVertex_t v, Neighbor **out);
 
