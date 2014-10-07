@@ -1,6 +1,6 @@
 // Original Author: Trevor Killeen (2014)
 // 
-// Represents a Graph ADT.
+// Represents a undirected Graph ADT.
 //
 // A Graph G(V,E) is a set of vertices V and pairs of connected vertices
 // {V1,V2} known as edges. 

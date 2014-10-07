@@ -21,17 +21,17 @@ typedef struct {
 // 2. The list of vertices that vertex has edges to (the adjacency list).
 // 3. The count of vertices that vertex has edges to. 
 // 4. A pointer to the next item in the list.
-typedef struct {
+typedef struct litem {
   GVertex_t         data;
   vertex           *adjlist;
   int               count;   
-  struct listitem  *next;
-} listitem;
+  struct litem     *next;
+} ListItem;
 
 // A Graph represented as an adjacency list is a list of vertices and the vertices
 // to which they have edges to.
 typedef struct graphimpl {
-  listitem *adjlist;
-} Graph;
+  ListItem *adjlist;
+} GraphImplementation;
 
 #endif
