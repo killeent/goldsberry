@@ -32,7 +32,13 @@ Graph AllocateGraph();
 //    -- g    the Graph to free.
 void FreeGraph(Graph g);
 
-// TODO: add contains Vertex
+// Tests to see if the Graph contains the given vertex.
+//
+//    -- g  the Graph to examine.
+//    -- v  the vertex to look for
+//
+// Returns true if the vertex exists in the graph, otherwise false.
+bool ContainsVertex(Graph g, GVertex_t v);
 
 // Tests to see if two vertices are adjacent.
 //
