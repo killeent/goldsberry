@@ -7,9 +7,10 @@
 #include "./Graph_priv.h"
 
 // Helper function declarations
+void FreeEdges(ListItem *vertex);
 ListItem *FindVertex(Graph g, GVertex_t v);
 ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2);
-int AddEdge(ListItem *vertex, GVertex_t v, int w);
+bool AddEdge(ListItem *vertex, GVertex_t v, int w);
 
 Graph AllocateGraph() {
   Graph g;
@@ -22,7 +23,26 @@ Graph AllocateGraph() {
   return g;
 }
 
+// Releases memory associated with the edge list of a given vertex.
+void FreeEdges(ListItem *vertex) {
+  EdgeItem *cur, temp;
+  
+  for (cur = vertex->neighbors; cur != NULL;) {
+    temp = cur->next;
+    free(cur);
+    cur = temp;  
+  }
+}
+
 void FreeGraph(Graph g) {
+  ListItem *cur, temp;
+
+  for (cur = g->front; cur != NULL;) {
+    FreeEdges(cur);
+    temp = cur->next;
+    free(cur);
+    cur = temp;
+  }
 }
 
 // Loops through the Graph looking for the given vertex. Returns a reference
@@ -106,19 +126,19 @@ int GetNeighbors(Graph g, GVertex_t v, Neighbor **out) {
 // function does not check to see if the vertex is already in the list. It
 // merely inserts the new edge at the front of the list of neighbors.
 //
-// Returns 1 if successful, 0 if an out of memory error occurs.
-int AddEdge(ListItem *li, GVertex_t v, int w) {
+// Returns true if successful, false if an out of memory error occurs.
+bool AddEdge(ListItem *li, GVertex_t v, int w) {
   EdgeItem *ei;
   ei = (EdgeItem *)malloc(sizeof(EdgeItem));
   if (ei == NULL) {
-    return 0;  
+    return false;  
   }
   ei->data = v;
   ei->weight = w;
   ei->next = li->neighbors;
   li->neighbors = ei;
   li->count++;
-  return 1;
+  return true;
 }
 
 void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
@@ -133,17 +153,20 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     // create first vertex and edge
     first = (ListItem *)malloc(sizeof(ListItem));
     if (first == NULL) {
-      // mem error
+      // first malloc, so nothing to clean here
+      return -1;
     }
     first->data = v1;
     if (!AddEdge(first, v2, w)) {
-      // mem error
+      free(first);
     }
     g->front = first;
     // now create second vertex
     second = (ListItem *)malloc(sizeof(ListItem));
     if (second == NULL) {
-      // mem error 
+
+      free(first);
+      g->front = NULL;
     }
     second->data = v2;
     if (!AddEdge(second, v1, w)) {
