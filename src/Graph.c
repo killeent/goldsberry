@@ -1,6 +1,7 @@
 // Original Author: Trevor Killeen (2014)
 
-#include <stdbool.h> // for bool type
+#include <stdbool.h>
+#include <stdlib.h>
 
 #include "./Graph.h"
 #include "./Graph_priv.h"
@@ -27,7 +28,7 @@ void FreeGraph(Graph g) {
 // to that vertex if it exists. Otherwise, returns NULL.
 ListItem *FindVertex(Graph g, GVertex_t v) {
   ListItem *l;
-  for (l != g->adjlist; l != NULL; l = l->next) {
+  for (l = g->adjlist; l != NULL; l = l->next) {
     if (l->data == v) {
       return l;
     }

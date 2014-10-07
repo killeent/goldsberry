@@ -7,8 +7,9 @@
 
 #include "src/Graph.h"
 
-int main() {
+int main(int argc, char **argv) {
   Graph g = AllocateGraph();
   FreeGraph(g);
+  printf("hello\n");
   return 0;
 }
