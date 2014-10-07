@@ -35,14 +35,16 @@ typedef struct litem {
 
 // A Graph represented as an adjacency list is a list of vertices and the 
 // vertices to which they have edges to. Our implementation is a simple Linked 
-// List of Linked Lists. 
+// List of Linked Lists. We store a reference to the front and the back
+// of the list of vertices.
 //
 // In practice, we would probably prefer to have a Hash
 // Table of vertices for better perf. However, since this project is mostly
 // for learning and will not be operating on large data sets, the overhead
 // involved to implement a Hash Table is not worth it.
 typedef struct graphimpl {
-  ListItem *adjlist;
+  ListItem *front;
+  ListItem *back;
 } GraphImplementation;
 
 #endif
