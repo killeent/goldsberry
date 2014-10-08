@@ -11,6 +11,7 @@ void FreeEdges(ListItem *vertex);
 ListItem *FindVertex(Graph g, GVertex_t v);
 ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2);
 bool AddEdge(ListItem *vertex, GVertex_t v, int w);
+void RemoveEdge(ListItem *vertex, GVertex_t v);
 
 Graph AllocateGraph() {
   Graph g;
@@ -28,7 +29,7 @@ void FreeEdges(ListItem *vertex) {
   EdgeItem *cur, temp;
   
   for (cur = vertex->neighbors; cur != NULL;) {
-    temp = cur->next;
+    temp = cur;
     free(cur);
     cur = temp;  
   }
@@ -122,7 +123,7 @@ int GetNeighbors(Graph g, GVertex_t v, Neighbor **out) {
   return vertex->count;
 }
 
-// Adds and edge to vertex v with weight w to the vertex stored in li. This
+// Adds an edge to vertex v with weight w to the vertex stored in li. This
 // function does not check to see if the vertex is already in the list. It
 // merely inserts the new edge at the front of the list of neighbors.
 //
@@ -141,9 +142,36 @@ bool AddEdge(ListItem *li, GVertex_t v, int w) {
   return true;
 }
 
+// Removes the edge pointing to v from the given vertex. This releases
+// the memory associated with the edge. 
+void RemoveEdge(ListItem *vertex, GVertex_t v) {
+  EdgeItem *cur, temp;
+  if (vertex->neighbors == NULL) {
+    return;
+  }
+  // if the edge is at the head of the list, simply update
+  // the pointer
+  if (vertex->neighbors->data == v) {
+    vertex->neighbors = vertex->neighbors->next;
+  }
+
+  cur = vertex->neighbors;
+  while (cur->next != NULL) {
+    if (cur->next->data == v) {
+      // the next thing in the list is the edge we want to remove
+      temp = cur->next;
+      cur->next = cur->next->next;
+      free(temp);
+      break;
+    }
+    cur = cur->next;
+  }
+}
+
 void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
-  ListItem *first, second;
+  ListItem *first, second, oldBack, temp;
   EdgeItem *ei;
+  bool addedVertex;
  
   // try to find the first vertex in the list
   first = FindFirstVertex(g->front, v1, v2);
@@ -159,19 +187,28 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     first->data = v1;
     if (!AddEdge(first, v2, w)) {
       free(first);
+      return -1;
     }
     g->front = first;
     // now create second vertex
     second = (ListItem *)malloc(sizeof(ListItem));
     if (second == NULL) {
-
+      FreeEdges(first); 
       free(first);
       g->front = NULL;
+      return -1;
     }
+
     second->data = v2;
+
     if (!AddEdge(second, v1, w)) {
-      // mem error
+      free(second);
+      FreeEdges(first);
+      free(first);
+      g->front = NULL;
+      return -1;
     }
+
     g->back = second;
     g->front->next = g->back;
     return 0;
@@ -179,7 +216,7 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
 
   // okay we found the first vertex lets add the edge
   if (!AddEdge(first, (first->data == v1) ? v2 : v1, w)) {
-    // mem error
+    return -1;
   }
 
   // now find the second vertex
@@ -188,17 +225,29 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     // one of the vertices is missing; we need to add it
     second = (ListItem *)malloc(sizeof(ListItem));
     if (second == NULL) {
-      // mem error
+      // we need to remove the edge we added to the first
+      // vertex
+      RemoveEdge(first, (first->data == v1) ? v2 : v1);     
+      return -1;
     }
+    addedVertex = true;
     second->data = (first->data == v1) ? v2 : v1;
     // update Graph pointers
     g->back->next = second;
+    oldBack = g->back;
     g->back = second;
   }
   
   // okay we have the second vertex lets add the edge
   if (!AddEdge(second, (second->data == v1) ? v2 : v1, w)) {
-    // mem error
+    RemoveEdge(first, (first->data == v1 ? v2 : v1));
+    // if the second vertex was previously not in the graph, remove it
+    if (addVertex) {
+      temp = g->back;
+      g->back = oldBack;
+      free(temp);
+    }
+    return -1;
   }
   
   // we made it!
