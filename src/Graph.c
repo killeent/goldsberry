@@ -166,6 +166,7 @@ void RemoveEdge(ListItem *vertex, GVertex_t v) {
     temp = vertex->neighbors;
     vertex->neighbors = vertex->neighbors->next;
     free(temp);
+    vertex->count--;
     return;
   }
 
@@ -176,6 +177,7 @@ void RemoveEdge(ListItem *vertex, GVertex_t v) {
       temp = cur->next;
       cur->next = cur->next->next;
       free(temp);
+      vertex->count--;
       return;
     }
     cur = cur->next;
