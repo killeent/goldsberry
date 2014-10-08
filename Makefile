@@ -15,4 +15,4 @@ graph.o : $(SRC)/Graph.h $(SRC)/Graph_priv.h $(SRC)/Graph.c
 	$(CC) $(CFLAGS) -c $(SRC)/Graph.c -o graph.o
 
 clean:
-	/bin/rm *.o goldsberry
+	/bin/rm -f *.o goldsberry

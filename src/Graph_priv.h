@@ -14,7 +14,7 @@
 // vertex/weight pairs, along with references to the next item in the list.
 // Thus we can easily encapsulate the outgoing edges for any vertex by
 // constructing a chain of EdgeItems.
-typedef struct {
+typedef struct EdgeItem {
   GVertex_t         data;
   int               weight;
   struct EdgeItem  *next;
@@ -26,11 +26,11 @@ typedef struct {
 // 2. The list of vertices that vertex has edges to.
 // 3. The count of vertices that vertex has edges to. 
 // 4. A pointer to the next item in the list.
-typedef struct litem {
+typedef struct ListItem {
   GVertex_t         data;
   EdgeItem         *neighbors;
   int               count;   
-  struct litem     *next;
+  struct ListItem  *next;
 } ListItem;
 
 // A Graph represented as an adjacency list is a list of vertices and the 

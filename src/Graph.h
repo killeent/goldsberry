@@ -26,7 +26,7 @@ typedef int GVertex_t;
 // A neighbor is a composed of a vertex and a weight. Thus for any given
 // vertex, the outgoing edges from that vertex can represented as a set of
 // neighbors.
-typedef struct neighb {
+typedef struct Neighbor {
   GVertex_t v;
   int       weight;
 } Neighbor;
