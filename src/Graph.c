@@ -19,7 +19,6 @@ Graph AllocateGraph() {
   g = (Graph) malloc(sizeof(GraphImplementation));
   if (g == NULL) {
     return NULL;
-
   }
   return g;
 }
@@ -29,7 +28,7 @@ void FreeEdges(ListItem *vertex) {
   EdgeItem *cur, temp;
   
   for (cur = vertex->neighbors; cur != NULL;) {
-    temp = cur;
+    temp = cur->next;
     free(cur);
     cur = temp;  
   }
@@ -57,9 +56,9 @@ ListItem *FindVertex(ListItem *vertex, GVertex_t v) {
   return NULL;
 }
 
-// Loops through the Graph starting at llooking for one of the two vertices. 
-// Returns a reference to the first of the two vertices it finds, if one of 
-// them exists. Otherwise, returns NULL.
+// Loops through the Graph starting at vertex looking for one of the two 
+// vertices. Returns a reference to the first of the two vertices it finds, 
+// if one of them exists. Otherwise, returns NULL.
 ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2) {
   for (vertex = g->front; vertex != NULL; vertex = vertex->next) {
     if (vertex->data == v1 || vertex-> data == v2) {
@@ -88,7 +87,6 @@ bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2) {
   v3 = (vertex->data == v1) ? v2 : v1;
 
   // now loop through the edges
-
   for (neighb = vertex->neighbors; neighb != NULL; neighb = neigbh->next) {
     if (neighb->data == v3) {
       return true;
@@ -105,15 +103,21 @@ int GetNeighbors(Graph g, GVertex_t v, Neighbor **out) {
   
   vertex = FindVertex(g->front, v1);
   if (vertex == NULL) {
+    // vertex not found
     return -1;  
   }
+
   if (vertex->count == 0) {
+    // vertex has no edges
     return 0;
   }
+
   *out = (Neighbor *)malloc(sizeof(Neighbor)*vertex->count);
   if (*out == NULL) {
+    // memory error
     return -2;
   }
+
   i = 0;
   for (neighb = vertex->neighbors; neighb != NULL; neighb = neighb->next) {
     out[i].v = neighb.data;
@@ -130,14 +134,19 @@ int GetNeighbors(Graph g, GVertex_t v, Neighbor **out) {
 // Returns true if successful, false if an out of memory error occurs.
 bool AddEdge(ListItem *li, GVertex_t v, int w) {
   EdgeItem *ei;
+
   ei = (EdgeItem *)malloc(sizeof(EdgeItem));
   if (ei == NULL) {
     return false;  
   }
+
   ei->data = v;
   ei->weight = w;
+  
+  // add to front of list
   ei->next = li->neighbors;
   li->neighbors = ei;
+
   li->count++;
   return true;
 }
@@ -146,9 +155,11 @@ bool AddEdge(ListItem *li, GVertex_t v, int w) {
 // the memory associated with the edge. 
 void RemoveEdge(ListItem *vertex, GVertex_t v) {
   EdgeItem *cur, temp;
+
   if (vertex->neighbors == NULL) {
     return;
   }
+
   // if the edge is at the head of the list, simply update
   // the pointer
   if (vertex->neighbors->data == v) {
@@ -184,12 +195,15 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
       // first malloc, so nothing to clean here
       return -1;
     }
+
     first->data = v1;
     if (!AddEdge(first, v2, w)) {
       free(first);
       return -1;
     }
+
     g->front = first;
+
     // now create second vertex
     second = (ListItem *)malloc(sizeof(ListItem));
     if (second == NULL) {
@@ -230,6 +244,7 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
       RemoveEdge(first, (first->data == v1) ? v2 : v1);     
       return -1;
     }
+
     addedVertex = true;
     second->data = (first->data == v1) ? v2 : v1;
     // update Graph pointers
@@ -252,4 +267,8 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   
   // we made it!
   return 0;
+}
+
+int RemoveGraphEdge(Graph g, GVertex_t v1, GVertex_t v2) {
+
 }
