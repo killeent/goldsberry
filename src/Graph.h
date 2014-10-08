@@ -89,8 +89,8 @@ int GetNeighbors(Graph g, GVertex_t v, Neighbor **out);
 //    -- v2   the destination vertex.
 //    -- w    the weight of the edge.
 //
-// Returns void.
-void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w);
+// Returns -1 on memory error, 0 on success.
+int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w);
 
 // Removes an edge between vertices.
 //
@@ -100,8 +100,8 @@ void AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w);
 //    -- v1   the source vertex.
 //    -- v2   the destination vertex.
 //
-// Returns -1 if either of the vertices is not present in the graph,
-// otherwise returns 0.
-int RemoveGraphEdge(Graph g, GVertex_t v1, GVertex_t v2);
+// If the either vertex is not in the graph, or if the edge is not
+// in the graph, does nothing.
+void RemoveGraphEdge(Graph g, GVertex_t v1, GVertex_t v2);
 
 #endif
