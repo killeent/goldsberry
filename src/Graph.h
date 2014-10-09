@@ -80,14 +80,15 @@ bool AreAdjacent(Graph g, GVertex_t v1, GVertex_t v2);
 int GetNeighbors(Graph g, GVertex_t v, Neighbor **out);
 
 // Adds an edge between two vertices. If either of the vertices is not
-// present in the Graph, they are automatically added.
+// present in the Graph, they are automatically added. The vertices
+// must be distinct (no self-loops are permitted).
 //
 // Arguments:
 //
 //    -- g    the Graph to add the edge to.
 //    -- v1   the source vertex.
 //    -- v2   the destination vertex.
-//    -- w    the weight of the edge.
+//    -- w    the weight of the edge. Must be non-negative.
 //
 // Returns -1 on memory error, 0 on success.
 int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w);
