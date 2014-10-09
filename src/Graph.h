@@ -41,10 +41,19 @@ Graph AllocateGraph();
 //    -- g    the Graph to free.
 void FreeGraph(Graph g);
 
+// Adds the given vertex to the graph.
+//
+//    -- g  the Graph to add the vertex to.
+//    -- v  the vertex to add.
+//
+// Returns -1 on memory error, 0 on success. If the vertex is
+// already in the graph, does nothing.
+int AddVertex(Graph g, GVertex_t v);
+
 // Tests to see if the Graph contains the given vertex.
 //
 //    -- g  the Graph to examine.
-//    -- v  the vertex to look for
+//    -- v  the vertex to look for.
 //
 // Returns true if the vertex exists in the graph, otherwise false.
 bool ContainsVertex(Graph g, GVertex_t v);

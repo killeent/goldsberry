@@ -10,6 +10,7 @@
 void FreeEdges(ListItem *vertex);
 ListItem *FindVertex(ListItem *vertex, GVertex_t v);
 ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2);
+int AddVertexSaveBack(Graph g, GVertex_t v, ListItem **back);
 bool AddEdge(ListItem *vertex, GVertex_t v, int w);
 void RemoveEdge(ListItem *vertex, GVertex_t v);
 int AddGraphEdgeEmptyGraph(Graph g, GVertex_t v1, GVertex_t v2, int w);
@@ -21,6 +22,8 @@ Graph AllocateGraph() {
   if (g == NULL) {
     return NULL;
   }
+  g->front = g->back = NULL;
+
   return g;
 }
 
@@ -69,6 +72,48 @@ ListItem *FindFirstVertex(ListItem *vertex, GVertex_t v1, GVertex_t v2) {
     }
   }
   return NULL;
+}
+
+// Adds a new vertex to the back of the list. Places a pointer to the old back
+// of the list in old if a Vertex is added, else is NULL. Otherwise, follows the 
+// conventions of AddVertex defined in Graph.h.
+int AddVertexSaveBack(Graph g, GVertex_t v, ListItem **old) {
+  ListItem *l;
+
+  if ((l = FindVertex(g->front, v)) != NULL) {
+    // already exists!
+    *old = NULL;
+    return 0;
+  }
+
+  l = (ListItem *)malloc(sizeof(ListItem));
+  if (l == NULL) {
+    return -1;
+  }
+
+  l->data = v;
+  l->neighbors = NULL;
+  l->count = 0;
+  l->next = NULL;
+
+  *old = g->back;
+
+  // case 1: graph empty, set as front and back 
+  if (g->front == NULL) {
+    g->front = g->back = l;
+    return 0;
+  }
+
+  // case 2: append to end
+  g->back->next = l;
+  g->back = l;
+  return 0;
+}
+
+// adds new vertex to the back of the list
+int AddVertex(Graph g, GVertex_t v) {
+  ListItem *l;
+  return AddVertexSaveBack(g, v, &l);
 }
 
 bool ContainsVertex(Graph g, GVertex_t v) {
@@ -190,6 +235,7 @@ void RemoveEdge(ListItem *vertex, GVertex_t v) {
 int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   ListItem *first, *second, *oldBackFirst, *oldBackSecond;
   bool addedFirst, addedSecond;
+  int ret;
 
   // handle empty graph
   if (g->front == NULL) {
@@ -201,19 +247,11 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
 
   if (first == NULL) {
     // neither vertex is in the graph. Add one 
-    first = (ListItem *)malloc(sizeof(ListItem));
-    if (first == NULL) {
+    ret = AddVertexSaveBack(g, v1, &oldBackFirst);
+    if (ret == -1) {
       return -1;  
     }
-    
-    first->data = v1;
-    first->count = 0;
-    first->neighbors = NULL;
-    first->next = NULL;
-
-    oldBackFirst = g->back;
-    g->back->next = first;
-    g->back = first;
+    first = g->back;
     addedFirst = true;
   }
 
@@ -232,8 +270,8 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   second = FindFirstVertex(first->next, v1, v2);
   if (second == NULL) {
     // the second vertex is missing; we need to add it
-    second = (ListItem *)malloc(sizeof(ListItem));
-    if (second == NULL) {
+    ret = AddVertexSaveBack(g, v2, &oldBackSecond);
+    if (ret == -1) {
       // we need to remove the edge we added to the first
       // vertex
       RemoveEdge(first, (first->data == v1) ? v2 : v1);     
@@ -244,16 +282,7 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
       }
       return -1;
     }
-
-    second->data = (first->data == v1) ? v2 : v1;
-    second->count = 0;
-    second->neighbors = NULL;
-    second->next = NULL;
-
-    // update Graph pointers
-    g->back->next = second;
-    oldBackSecond = g->back;
-    g->back = second;
+    second = g->back;
     addedSecond = true;
   }
   
@@ -281,60 +310,48 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
 
 int AddGraphEdgeEmptyGraph(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   ListItem *first, *second;
+  int ret;
 
   // create first vertex and edge
-  first = (ListItem *)malloc(sizeof(ListItem));
-  if (first == NULL) {
-    // first malloc, so nothing to clean here
+  ret = AddVertex(g, v1);
+  if (ret == -1) {
     return -1;
   }
-
-  first->data = v1;
-  first->count = 0;
-  first->neighbors = NULL;
-  first->next = NULL;
+  first = g->back;
 
   // add edge to v2
   if (!AddEdge(first, v2, w)) {
     free(first);
     return -1;
   }
-
-  g->front = first;
-
-  // now create second vertex
-  second = (ListItem *)malloc(sizeof(ListItem));
-  if (second == NULL) {
+  
+  // now add second vertex
+  ret = AddVertex(g, v2);
+  if (ret == -1) {
     FreeEdges(first); 
     free(first);
     g->front = NULL;
     return -1;
   }
-
-  second->data = v2;
-  second->count = 0;
-  second->neighbors = NULL;
-  second->next = NULL;
+  second = g->back;
 
   // add edge to v1
   if (!AddEdge(second, v1, w)) {
     free(second);
     FreeEdges(first);
     free(first);
-    g->front = NULL;
+    g->front = g->back = NULL;
     return -1;
   }
 
-  g->back = second;
-  g->front->next = g->back;
   return 0;
 }
 
 void RemoveGraphEdge(Graph g, GVertex_t v1, GVertex_t v2) {
   ListItem *first, *second;
 
-  // if graph is empty, return immediately
-  if (g->front == NULL) {
+  // if graph is empty, or single element, return immediately
+  if (g->front == NULL || g->front == g->back) {
     return;
   }
 

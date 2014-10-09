@@ -59,6 +59,8 @@ START_TEST(single_edge_test)
 }
 END_TEST
 
+// Tests removing a single edge from the Graph.
+
 Suite *GraphSuite() {
   Suite *s;
   TCase *tc_core;
