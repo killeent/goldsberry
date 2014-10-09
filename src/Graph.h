@@ -31,7 +31,7 @@ typedef struct Neighbor {
   int       weight;
 } Neighbor;
 
-// Allocates a new Graph.
+// Allocates a new Graph. Returns NULL on memory error.
 Graph AllocateGraph();
 
 // Frees an existing Graph.

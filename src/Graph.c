@@ -308,6 +308,7 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   return 0;
 }
 
+// helper function to add an edge to a previously empty Graph.
 int AddGraphEdgeEmptyGraph(Graph g, GVertex_t v1, GVertex_t v2, int w) {
   ListItem *first, *second;
   int ret;
