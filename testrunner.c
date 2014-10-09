@@ -15,6 +15,9 @@ int main() {
   s = GraphSuite();
   runner = srunner_create(s);
 
+  // for debugging
+  srunner_set_fork_status(runner, CK_NOFORK);
+
   srunner_run_all(runner, CK_NORMAL);
   failures = srunner_ntests_failed(runner);
   srunner_free(runner);

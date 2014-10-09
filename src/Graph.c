@@ -43,6 +43,8 @@ void FreeGraph(Graph g) {
     free(cur);
     cur = temp;
   }
+
+  free(g);
 }
 
 // Loops through the Graph looking for the given vertex. Returns a reference
@@ -201,6 +203,9 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     }
 
     first->data = v1;
+    first->count = 0;
+    first->neighbors = NULL;
+
     if (!AddEdge(first, v2, w)) {
       free(first);
       return -1;
@@ -218,6 +223,8 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     }
 
     second->data = v2;
+    second->count = 0;
+    second->neighbors = NULL;
 
     if (!AddEdge(second, v1, w)) {
       free(second);
@@ -250,6 +257,9 @@ int AddGraphEdge(Graph g, GVertex_t v1, GVertex_t v2, int w) {
     }
 
     second->data = (first->data == v1) ? v2 : v1;
+    second->count = 0;
+    second->neighbors = NULL;
+
     // update Graph pointers
     g->back->next = second;
     oldBack = g->back;
