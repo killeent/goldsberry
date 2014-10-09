@@ -333,9 +333,14 @@ int AddGraphEdgeEmptyGraph(Graph g, GVertex_t v1, GVertex_t v2, int w) {
 void RemoveGraphEdge(Graph g, GVertex_t v1, GVertex_t v2) {
   ListItem *first, *second;
 
+  // if graph is empty, return immediately
+  if (g->front == NULL) {
+    return;
+  }
+
   first = FindFirstVertex(g->front, v1, v2);
   second = FindFirstVertex(first->next, v1, v2);
-  // if one or vertices is missing, return immediately
+  // if one or vertices is missing, return 
   if (first == NULL || second == NULL) {
     return;
   }

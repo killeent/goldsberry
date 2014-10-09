@@ -19,20 +19,36 @@ START_TEST(alloc_test)
 }
 END_TEST
 
+// Tests operations on an empty graph, verifying that they do not
+// cause crashes.
+START_TEST(empty_graph_test)
+{
+  Graph g;
+  Neighbor *out;
+
+  g = AllocateGraph();
+  
+  ck_assert(ContainsVertex(g, 0) == false);
+  ck_assert(AreAdjacent(g, 0, 1) == false);
+  ck_assert(GetNeighbors(g, 0, &out) == -1);
+  RemoveGraphEdge(g, 0, 1);
+
+  FreeGraph(g);
+}
+END_TEST
+
 // Tests adding a single edge to the Graph. Checks that 
 //
 // 1. ContainsVertex returns true
-// 2. AreAdjacent reutrns true
+// 2. AreAdjacent returns true
 START_TEST(single_edge_test)
 {
   Graph g;
-  int ret;
 
   g = AllocateGraph();
-  ret = AddGraphEdge(g, 1, 2, 0);
   
   // in the off chance we have a memory error
-  ck_assert_msg(ret == 0); 
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
 
   ck_assert(ContainsVertex(g, 1));
   ck_assert(ContainsVertex(g, 2));
@@ -52,6 +68,7 @@ Suite *GraphSuite() {
   tc_core = tcase_create("Core");
 
   tcase_add_test(tc_core, alloc_test);
+  tcase_add_test(tc_core, empty_graph_test);
   tcase_add_test(tc_core, single_edge_test);
 
   suite_add_tcase(s, tc_core);
