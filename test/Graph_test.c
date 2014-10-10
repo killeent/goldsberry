@@ -34,8 +34,8 @@ START_TEST(empty_graph_test)
 {
   Neighbor *out;
 
-  ck_assert(ContainsVertex(g, 0) == false);
-  ck_assert(AreAdjacent(g, 0, 1) == false);
+  ck_assert(!ContainsVertex(g, 0));
+  ck_assert(!AreAdjacent(g, 0, 1));
   ck_assert(GetNeighbors(g, 0, &out) == -1);
   RemoveGraphEdge(g, 0, 1);
 }
@@ -43,6 +43,8 @@ END_TEST
 
 // Tests adding a single vertex to the Graph.
 START_TEST(single_vertex_test) {
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(ContainsVertex(g, 1));
 }
 END_TEST
 
@@ -52,7 +54,6 @@ END_TEST
 // 2. AreAdjacent returns true
 START_TEST(single_edge_empty_graph_test)
 {
-  // in the off chance we have a memory error
   ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
 
   ck_assert(ContainsVertex(g, 1));
@@ -62,7 +63,108 @@ START_TEST(single_edge_empty_graph_test)
 }
 END_TEST
 
-// Tests removing a single edge from the Graph.
+// Tests removing the only edge from a Graph.
+START_TEST(single_edge_removal_test) {
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0);
+  RemoveGraphEdge(g, 1, 2);
+
+  ck_assert(!AreAdjacent(g, 1, 2));
+  ck_assert(ContainsVertex(g, 1));
+  ck_assert(ContainsVertex(g, 2));
+}
+END_TEST
+
+// Tests removing a nonexistant edge from the Graph (tests for not crashing)
+START_TEST(missing_edge_removal_test) {
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  RemoveGraphEdge(g, 1, 2);
+}
+END_TEST;
+
+// Tests removing a nonexistant edge from the Graph where one of
+// the vertices is missing (tests for not crashing)
+START_TEST(missing_edge_and_vertex_removal_test) {
+  ck_assert(AddVertex(g, 1) != -1);
+  RemoveGraphEdge(g, 1, 2);
+}
+END_TEST;
+
+// Tests adding an edge to the graph where one vertex is
+// already present.
+START_TEST(single_edge_one_vertex_present_test)
+{
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
+
+  ck_assert(ContainsVertex(g, 1));
+  ck_assert(ContainsVertex(g, 2));
+  ck_assert(AreAdjacent(g, 1, 2));
+  ck_assert(AreAdjacent(g, 2, 1)); 
+}
+END_TEST
+
+// Tests adding an edge to the graph where both vertices are present.
+START_TEST(single_edge_both_vertices_present_test)
+{
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
+
+  ck_assert(ContainsVertex(g, 1));
+  ck_assert(ContainsVertex(g, 2));
+  ck_assert(AreAdjacent(g, 1, 2));
+  ck_assert(AreAdjacent(g, 2, 1)); 
+}
+END_TEST
+
+// Tests adding an edges to the graph where both vertices are present in
+// addition to a number of other vertices. 
+START_TEST(multiple_edges_populated_graph_test)
+{
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddVertex(g, 5) != -1);
+  ck_assert(AddVertex(g, 3) != -1);
+  ck_assert(AddVertex(g, 9) != -1);
+  ck_assert(AddVertex(g, 7) != -1);
+  ck_assert(AddGraphEdge(g, 5, 3, 0) == 0); 
+  ck_assert(AddGraphEdge(g, 7, 1, 0) == 0);
+
+  ck_assert(AreAdjacent(g, 5, 3));
+  ck_assert(AreAdjacent(g, 7, 1)); 
+}
+END_TEST
+
+// Tests adding multiple edges to a single vertex.
+START_TEST(multiple_edges_from_single_vertex_test)
+{
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddVertex(g, 5) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
+  ck_assert(AddGraphEdge(g, 1, 5, 0) == 0);
+
+  ck_assert(AreAdjacent(g, 1, 2));
+  ck_assert(AreAdjacent(g, 1, 5));
+}
+END_TEST
+
+// Tests removing multiple edges from a single vertex.
+START_TEST(remove_multiple_edges_from_single_vertex_test)
+{
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddVertex(g, 5) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
+  ck_assert(AddGraphEdge(g, 1, 5, 0) == 0);
+  RemoveGraphEdge(g, 1, 2);
+  RemoveGraphEdge(g, 1, 5);
+
+  ck_assert(!AreAdjacent(g, 1, 2));
+  ck_assert(!AreAdjacent(g, 1, 5));
+}
+END_TEST
 
 Suite *GraphSuite() {
   Suite *s;
@@ -77,6 +179,14 @@ Suite *GraphSuite() {
   tcase_add_test(tc_core, empty_graph_test);
   tcase_add_test(tc_core, single_vertex_test);
   tcase_add_test(tc_core, single_edge_empty_graph_test);
+  tcase_add_test(tc_core, single_edge_removal_test);
+  tcase_add_test(tc_core, missing_edge_removal_test);
+  tcase_add_test(tc_core, missing_edge_and_vertex_removal_test);
+  tcase_add_test(tc_core, single_edge_one_vertex_present_test);
+  tcase_add_test(tc_core, single_edge_both_vertices_present_test);
+  tcase_add_test(tc_core, multiple_edges_populated_graph_test);
+  tcase_add_test(tc_core, multiple_edges_from_single_vertex_test);
+  tcase_add_test(tc_core, remove_multiple_edges_from_single_vertex_test);
 
   suite_add_tcase(s, tc_core);
 
