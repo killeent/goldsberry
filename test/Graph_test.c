@@ -3,10 +3,15 @@
 // Test Suite for the Graph ADT and adjacency list implementation.
 
 #include <check.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 #include "./Graph_test.h"
 #include "../src/Graph.h"
 #include "../src/Graph_priv.h"
+
+// Helper function declarations.
+bool ContainsNeighbor(Neighbor *, int, GVertex_t, int);
 
 // Allocate a Graph on setup, Free it on teardown
 
@@ -42,7 +47,8 @@ START_TEST(empty_graph_test)
 END_TEST
 
 // Tests adding a single vertex to the Graph.
-START_TEST(single_vertex_test) {
+START_TEST(single_vertex_test) 
+{
   ck_assert(AddVertex(g, 1) != -1);
   ck_assert(ContainsVertex(g, 1));
 }
@@ -64,7 +70,8 @@ START_TEST(single_edge_empty_graph_test)
 END_TEST
 
 // Tests removing the only edge from a Graph.
-START_TEST(single_edge_removal_test) {
+START_TEST(single_edge_removal_test) 
+{
   ck_assert(AddGraphEdge(g, 1, 2, 0) == 0);
   RemoveGraphEdge(g, 1, 2);
 
@@ -75,7 +82,8 @@ START_TEST(single_edge_removal_test) {
 END_TEST
 
 // Tests removing a nonexistant edge from the Graph (tests for not crashing)
-START_TEST(missing_edge_removal_test) {
+START_TEST(missing_edge_removal_test) 
+{
   ck_assert(AddVertex(g, 1) != -1);
   ck_assert(AddVertex(g, 2) != -1);
   RemoveGraphEdge(g, 1, 2);
@@ -84,7 +92,8 @@ END_TEST;
 
 // Tests removing a nonexistant edge from the Graph where one of
 // the vertices is missing (tests for not crashing)
-START_TEST(missing_edge_and_vertex_removal_test) {
+START_TEST(missing_edge_and_vertex_removal_test) 
+{
   ck_assert(AddVertex(g, 1) != -1);
   RemoveGraphEdge(g, 1, 2);
 }
@@ -166,6 +175,60 @@ START_TEST(remove_multiple_edges_from_single_vertex_test)
 }
 END_TEST
 
+// Tests trying to get the neighbors from a vertex not in the Graph.
+START_TEST(get_neighbors_missing_vertex_test)
+{
+  Neighbor *out;
+
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(GetNeighbors(g, 3, &out) == -1);
+}
+END_TEST
+
+// Tests trying to get the neighbors from a vertex with no neighbors.
+START_TEST(get_neighbors_no_neighbors_test) 
+{
+  Neighbor *out;
+
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(GetNeighbors(g, 1, &out) == 0);
+}
+END_TEST
+
+// Tests trying to get the neighbors from a vertex with a single neighbor.
+START_TEST(get_neighbors_single_neighbor_test) 
+{
+  Neighbor *out;
+
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 0) == 0); 
+  ck_assert(GetNeighbors(g, 1, &out) == 1);
+
+  ck_assert(ContainsNeighbor(out, 1, 2, 0));
+  free(out);
+}
+END_TEST
+
+// Tests trying to get the neighbors from a vertex with multiple neighbors.
+START_TEST(get_neighbors_multiple_neighbors_test)
+{
+  Neighbor *out;
+
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddVertex(g, 5) != -1);
+  ck_assert(AddGraphEdge(g, 1, 2, 1) == 0); 
+  ck_assert(AddGraphEdge(g, 1, 5, 5) == 0);
+
+  ck_assert(GetNeighbors(g, 1, &out) == 2);
+  ck_assert(ContainsNeighbor(out, 2, 2, 1));
+  ck_assert(ContainsNeighbor(out, 2, 5, 5));
+  free(out);
+}
+END_TEST
+
 Suite *GraphSuite() {
   Suite *s;
   TCase *tc_core;
@@ -187,8 +250,27 @@ Suite *GraphSuite() {
   tcase_add_test(tc_core, multiple_edges_populated_graph_test);
   tcase_add_test(tc_core, multiple_edges_from_single_vertex_test);
   tcase_add_test(tc_core, remove_multiple_edges_from_single_vertex_test);
+  tcase_add_test(tc_core, get_neighbors_missing_vertex_test);
+  tcase_add_test(tc_core, get_neighbors_no_neighbors_test);
+  tcase_add_test(tc_core, get_neighbors_single_neighbor_test);
+  tcase_add_test(tc_core, get_neighbors_multiple_neighbors_test);
 
   suite_add_tcase(s, tc_core);
 
   return s;
+}
+
+// Helper function to determine if the given neighbor with the given weight
+// is present in the list specified by out.
+bool ContainsNeighbor(Neighbor *out, int capacity, GVertex_t v, int w) {
+  Neighbor n;
+  int i;
+
+  for (i = 0; i < capacity; i++) {
+    n = out[i];
+    if (n.v == v && n.weight == w) {
+      return true;
+    }
+  }
+  return false;
 }
