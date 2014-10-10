@@ -229,6 +229,81 @@ START_TEST(get_neighbors_multiple_neighbors_test)
 }
 END_TEST
 
+// Tests a series of interleaved add vertex, add edge and add remove operations.
+START_TEST(pseudo_end_to_end_test)
+{
+  Neighbor *out;
+  int i;
+
+  ck_assert(AddVertex(g, 1) != -1);
+  ck_assert(AddVertex(g, 2) != -1);
+  ck_assert(AddVertex(g, 3) != -1);
+  ck_assert(AddVertex(g, 4) != -1);
+  ck_assert(AddVertex(g, 5) != -1);
+  ck_assert(AddVertex(g, 6) != -1);
+  ck_assert(AddVertex(g, 7) != -1);
+  ck_assert(AddVertex(g, 8) != -1);
+
+  ck_assert(AddGraphEdge(g, 9, 10, 0) == 0);
+  ck_assert(AddGraphEdge(g, 6, 3, 0) == 0);
+  ck_assert(AddGraphEdge(g, 3, 10, 0) == 0);
+  ck_assert(AddGraphEdge(g, 1, 5, 0) == 0);
+  ck_assert(AddGraphEdge(g, 4, 2, 1) == 0);
+  ck_assert(AddGraphEdge(g, 4, 3, 1) == 0);
+  ck_assert(AddGraphEdge(g, 4, 5, 1) == 0);
+  ck_assert(AddGraphEdge(g, 8, 1, 2) == 0);
+  ck_assert(AddGraphEdge(g, 9, 2, 2) == 0);
+
+  // Tests everything up to this point
+  for (i = 1; i <= 10; i++) {
+    ck_assert(ContainsVertex(g, i));
+  }
+  ck_assert(AreAdjacent(g, 9, 10));
+  ck_assert(AreAdjacent(g, 6, 3));
+  ck_assert(AreAdjacent(g, 3, 10));
+  ck_assert(AreAdjacent(g, 1, 5));
+  ck_assert(AreAdjacent(g, 4, 2));
+  ck_assert(AreAdjacent(g, 3, 4));
+  ck_assert(AreAdjacent(g, 5, 4));
+  ck_assert(AreAdjacent(g, 8, 1));
+  ck_assert(AreAdjacent(g, 9, 2));
+
+  // do some removes
+  RemoveGraphEdge(g, 3, 10);
+  RemoveGraphEdge(g, 4, 2);
+  RemoveGraphEdge(g, 9, 2);
+
+  // check adjacencies
+  ck_assert(!AreAdjacent(g, 3, 10));
+  ck_assert(!AreAdjacent(g, 4, 2));
+  ck_assert(!AreAdjacent(g, 9, 2));
+
+  // add some more things
+  ck_assert(AddGraphEdge(g, 2, 3, 3) == 0);
+  ck_assert(AddGraphEdge(g, 4, 2, 2) == 0);
+  ck_assert(AddGraphEdge(g, 5, 6, 3) == 0);
+
+  ck_assert(AreAdjacent(g, 3, 2));
+  ck_assert(AreAdjacent(g, 4, 2));
+  ck_assert(AreAdjacent(g, 5, 6));
+
+  // okay lets test some neighbors!
+  ck_assert(GetNeighbors(g, 3, &out) == 3);
+  ck_assert(ContainsNeighbor(out, 3, 2, 3));
+  ck_assert(ContainsNeighbor(out, 3, 6, 0));
+  ck_assert(ContainsNeighbor(out, 3, 4, 1)); 
+  free(out);
+
+  ck_assert(GetNeighbors(g, 4, &out) == 3);
+  ck_assert(ContainsNeighbor(out, 3, 2, 2));
+  ck_assert(ContainsNeighbor(out, 3, 3, 1));
+  ck_assert(ContainsNeighbor(out, 3, 5, 1)); 
+  free(out);
+
+  ck_assert(GetNeighbors(g, 7, &out) == 0);
+}
+END_TEST
+
 Suite *GraphSuite() {
   Suite *s;
   TCase *tc_core;
@@ -254,6 +329,7 @@ Suite *GraphSuite() {
   tcase_add_test(tc_core, get_neighbors_no_neighbors_test);
   tcase_add_test(tc_core, get_neighbors_single_neighbor_test);
   tcase_add_test(tc_core, get_neighbors_multiple_neighbors_test);
+  tcase_add_test(tc_core, pseudo_end_to_end_test);
 
   suite_add_tcase(s, tc_core);
 
