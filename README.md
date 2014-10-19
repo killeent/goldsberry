@@ -10,9 +10,9 @@ Goldsberry is a graph implementation written in C.
 
 ### Building
 
-To build everything, type: `make`
-To build only the CLI, type `make goldsberry`
-To build only the test suite, type `make test`
+To build everything, type: `make`.
+To build only the CLI, type `make goldsberry`.
+To build only the test suite, type `make test`.
 `make clean` works as expected. 
 
 The only dependency is the C unit testing framework check: http://check.sourceforge.net/
