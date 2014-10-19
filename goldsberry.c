@@ -64,14 +64,15 @@ void neighbors(Graph g, int x) {
     printf("%d is not in the graph\n", x);
   } else if (ret == 0) {
     printf("%d has no neighbors\n", x);
+  } else {
+    printf("%d has edges to:", x);
+    for (i = 0; i < ret;  i++) {
+      nb = out[i];
+      printf(" (%d, weight: %d)", nb.v, nb.weight);
+    }
+    printf("\n");
   }
-
-  printf("%d has edges to:", x);
-  for (i = 0; i < ret; i++) {
-    nb = out[i];
-    printf(" (%d, weight: %d),", nb.v, nb.weight);
-  }
-  printf("\n");
+  free(out);
 }
 
 void error(char *msg) {
@@ -129,6 +130,9 @@ bool parseInput(Graph g, char *input) {
   char *split;
   bool should_exit = false;
 
+  // remove trailing newline
+  split = strtok(input, "\n");
+
   split = strtok(input, " ");
   if (split == NULL) {
     error("unknown command");
@@ -137,43 +141,43 @@ bool parseInput(Graph g, char *input) {
   
   // gross if/else ladder to figure out what function to call and
   // verify proper input to that function
-  if (strcmp(split, "add")) {
+  if (strcmp(split, "add") == 0) {
     if (!extractOneInt(&x)) {
       error("invalid arguments to add");
     }
     add(g, x);
-  } else if (strcmp(split, "contains")) {
+  } else if (strcmp(split, "contains") == 0) {
     if (!extractOneInt(&x)) {
       error("invalid arguments to contains");
     }
     contains(g, x);
-  } else if (strcmp(split, "adj")) {
+  } else if (strcmp(split, "adj") == 0) {
     if (!extractTwoInts(&x, &y)) {
       error("invalid arguments to adj");
     }
     adj(g, x, y);
-  } else if (strcmp(split, "edge")) {
+  } else if (strcmp(split, "edge") == 0) {
     if (!extractThreeInts(&x, &y, &w)) {
       error("invalid arguments to edge");
     }
     addEdge(g, x, y, w);
-  } else if (strcmp(split, "remove")) {
+  } else if (strcmp(split, "remove") == 0) {
     if (!extractTwoInts(&x, &y)) {
       error("invalid argument to remove");
     }
     removeEdge(g, x, y);
-  } else if (strcmp(split, "neighbors")) {
+  } else if (strcmp(split, "neighbors") == 0) {
     // try to get the vertex it wants
     if (!extractOneInt(&x)) {
       error("invalid argument to neighbors");
     }
     neighbors(g, x); 
-  } else if (strcmp(split, "help")) {
+  } else if (strcmp(split, "help") == 0) {
     help();
-  } else if (strcmp(split, "quit")) {
+  } else if (strcmp(split, "quit") == 0) {
     should_exit = true;
   } else {
-    error("invalid commaned");
+    error("invalid command");
   }
 
   return should_exit;
@@ -192,7 +196,7 @@ int main(int argc, char **argv) {
 
   while(1) {
     fgets(buf, BUF_SIZE, stdin);
-    if (!parseInput(g, buf)) {
+    if (parseInput(g, buf)) {
       break;
     }
 
